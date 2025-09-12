@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+enum CompanyType {
+  CLIENT
+  SUPPLIER
+  BOTH
+}
+
+model Company {
+  id                  Int         @id @default(autoincrement())
+  name                String      @unique
+  address             String?
+  fiscalIdentifiers   String?
+  email               String?
+  phone               String?
+  website             String?
+  iban                String?
+  bicSwift            String?
+  type                CompanyType @default(BOTH)
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  
+  // Relations
+  users               User[]
+  supplierInvoices    Facture[]   @relation("SupplierInvoices")
+  buyerInvoices       Facture[]   @relation("BuyerInvoices")
+}
+
+model SubscriptionPlan {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  price       Float
+  tokens      Int
+  duration    Int      // Duration in days
+  isActive    Boolean  @default(true)
+  features    String[] // JSON array of features
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  abonnements Abonnement[]
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  password         String
+  name             String
+  isEmailVerified  Boolean           @default(false)
+  role             Role              @default(USER)
+  company          Company?          @relation(fields: [companyId], references: [id])
+  companyId        Int?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  abonnement       Abonnement?
+  factures         Facture[]
+  historiqueTokens HistoriqueToken[]
+  auditLogs        AuditLog[]
+}
+
+model Abonnement {
+  id             Int      @id @default(autoincrement())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         Int      @unique
+  plan           SubscriptionPlan @relation(fields: [planId], references: [id])
+  planId         Int
+  type           String
+  tokensRestants Int
+  dateDebut      DateTime
+  dateFin        DateTime
+  isActive       Boolean  @default(true)
+  stripeSubscriptionId String?
+  lastPaymentDate      DateTime?
+  nextPaymentDate      DateTime?
+}
+
+model Facture {
+  id             Int       @id @default(autoincrement())
+  user           User      @relation(fields: [userId], references: [id])
+  userId         Int
+  supplier       Company?  @relation("SupplierInvoices", fields: [supplierId], references: [id])
+  supplierId     Int?
+  buyer          Company?  @relation("BuyerInvoices", fields: [buyerId], references: [id])
+  buyerId        Int?
+
+  // Section document
+  typeDocument   String
+  langue         String
+  source         String
+
+  // Section facture
+  numero             String
+  dateEmission       DateTime?
+  dateEcheance       DateTime?
+  commandeRef        String?
+  conditionsPaiement String?
+  devise             String?
+
+  // Totaux
+  sousTotalHT  Float?
+  totalTVA     Float?
+  remise       Float?
+  frais        Float?
+  totalTTC     Float?
+  dejaRegle    Float?
+  resteAPayer  Float?
+
+  // Paiement
+  moyensAcceptes      String?
+  instructionsPaiement String?
+  referencePaiement    String?
+
+  // Notes et texte brut
+  notes             String?
+  texteBrutComplet  String?
+
+  // Relations
+  lignes            LigneFacture[]
+  historiqueTokens  HistoriqueToken[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LigneFacture {
+  id             Int      @id @default(autoincrement())
+  facture        Facture  @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  factureId      Int
+  description    String
+  codeArticle    String?
+  quantite       Float?
+  unite          String?
+  prixUnitaireHT Float?
+  tauxTVA        Float?
+  montantHT      Float?
+  montantTTC     Float?
+}
+
+model HistoriqueToken {
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+  facture         Facture? @relation(fields: [factureId], references: [id])
+  factureId       Int?
+  tokensUtilises  Int
+  dateUtilisation DateTime @default(now())
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}

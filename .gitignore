@@ -1,0 +1,37 @@
+# dependencies
+/Frontend/node_modules
+
+# next.js
+/Frontend/.next/
+/Frontend/out/
+
+# production
+/Frontend/build
+
+# debug
+/Frontend/npm-debug.log*
+/Frontend/yarn-debug.log*
+/Frontend/yarn-error.log*
+/Frontend/.pnpm-debug.log*
+
+# env files
+/Frontend/.env*
+/Frontend/.gitignore
+
+# vercel
+/Frontend/.vercel
+
+# typescript
+/Frontend/*.tsbuildinfo
+/Frontend/next-env.d.ts
+
+/Frontend/prisma/migrations
+/Frontend/README.md
+
+/Backend/__pycache__/
+/Backend/.env*
+
+/Backend/.gitignore
+
+/Backend/.idea
+/Frontend/.idea

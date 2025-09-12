@@ -1,0 +1,9 @@
+fastapi
+starlette
+pydantic
+python-dotenv
+uvicorn[standard]
+groq
+pdf2image
+Pillow
+python-multipart
