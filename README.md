@@ -42,6 +42,16 @@ This guide outlines the steps to set up and run the project, including both the 
    ```bash
    npx tsx prisma/seed.ts
    ```
+   After seeding, the following default users will be created with the password `password123`:
+
+   | Email                | Role    |
+   |----------------------|---------|
+   | admin@domain.com     | ADMIN   |
+   | manager@domain.com   | MANAGER |
+   | user1@domain.com     | USER    |
+   | user2@domain.com     | USER    |
+   | user3@domain.com     | USER    |
+   | solo@domain.com      | USER    |
 
 8. **Run the Frontend**  
    For development, use:
